@@ -46,7 +46,6 @@ namespace TfsWebAPi
             {
                 ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
             });
-            app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {
