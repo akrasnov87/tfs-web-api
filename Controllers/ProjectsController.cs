@@ -31,7 +31,7 @@ namespace TfsWebAPi.Controllers
                     ContentResult content = new ContentResult();
                     content.StatusCode = 200;
                     content.ContentType = "text/plain";
-
+                    content.Content = teamProjectReference.ToBotString();
                     return content;
                 }          
             }
