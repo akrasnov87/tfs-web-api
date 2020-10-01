@@ -46,9 +46,9 @@ namespace TfsWebAPi.Data
                         if (connection.AuthorizedIdentity.IsActive)
                         {
                             string format = "text";
-                            if(context.HttpContext.Request.Query.ContainsKey("format"))
+                            if(context.HttpContext.Request.Headers["Content-Type"] != "text/plain")
                             {
-                                format = context.HttpContext.Request.Query["format"];
+                                format = context.HttpContext.Request.Headers["Content-Type"];
                             }
                             context.HttpContext.User = new TfsClaimsPrincipal(new TfsIdentity(vssConnection, parts), format);
                             await next();

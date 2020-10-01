@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Mvc;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
@@ -18,7 +19,16 @@ namespace TfsWebAPi.Data
 
         public bool IsReturnJson
         {
-            get { return ReturnFormat == "json"; }
+            get { return ReturnFormat == "application/json"; }
+        }
+
+        public ContentResult GetContentResult(string text)
+        {
+            ContentResult content = new ContentResult();
+            content.StatusCode = 200;
+            content.ContentType = ReturnFormat;
+            content.Content = text;
+            return content;
         }
 
         public void Dispose()

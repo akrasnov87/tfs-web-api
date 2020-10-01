@@ -21,18 +21,12 @@ namespace TfsWebAPi.Controllers
             using (TfsClaimsPrincipal claim = (TfsClaimsPrincipal)HttpContext.User)
             {
                 CommandHandler handler = new CommandHandler(claim, null);
-                TeamProjectReference teamProjectReference = handler.GetProjectResult().ConfigureAwait(false).GetAwaiter().GetResult();
+                TeamProjectReference teamProjectReference = handler.GetProjectResult();
 
-                if (claim.IsReturnJson)
-                {
+                if (claim.IsReturnJson) {
                     return new JsonResult(teamProjectReference);
-                } else
-                {
-                    ContentResult content = new ContentResult();
-                    content.StatusCode = 200;
-                    content.ContentType = "text/plain";
-                    content.Content = teamProjectReference.ToBotString();
-                    return content;
+                } else {
+                    return claim.GetContentResult(teamProjectReference.ToBotString());
                 }          
             }
         }

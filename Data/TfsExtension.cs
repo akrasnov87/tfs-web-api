@@ -10,7 +10,7 @@ namespace TfsWebAPi.Data
     {
         public static string ToBotString(this TeamProjectReference obj)
         {
-           return "";
+           return obj.Name + " - " + obj.Description;
         }
     }
 }
