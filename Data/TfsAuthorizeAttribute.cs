@@ -34,7 +34,8 @@ namespace TfsWebAPi.Data
                 {
                     KeyValuePair<string, StringValues> keyValue = context.HttpContext.Request.Headers.FirstOrDefault(t => t.Key == "Authorization");
                     string token = keyValue.Value;
-                    token = token.Replace("TFS ", "");
+                    string[] tokenData = token.Split(' ');
+                    token = tokenData[1];
                     var base64EncodedBytes = Convert.FromBase64String(token);
                     string data = Encoding.UTF8.GetString(base64EncodedBytes);
                     string[] parts = data.Split("|");
@@ -50,7 +51,7 @@ namespace TfsWebAPi.Data
                             {
                                 format = context.HttpContext.Request.Headers["Content-Type"];
                             }
-                            context.HttpContext.User = new TfsClaimsPrincipal(new TfsIdentity(vssConnection, parts), format);
+                            context.HttpContext.User = new TfsClaimsPrincipal(new TfsIdentity(vssConnection, tokenData[0], parts), format);
                             await next();
                             connection.Dispose();
                         }

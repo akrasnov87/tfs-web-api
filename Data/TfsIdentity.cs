@@ -12,7 +12,7 @@ namespace TfsWebAPi
     {
         private Guid id;
         private readonly MyVssConnection connection;
-        public TfsIdentity(MyVssConnection vssConnection, string[] parts)
+        public TfsIdentity(MyVssConnection vssConnection, string type, string[] parts)
         {
             Name = vssConnection.GetConnection().AuthorizedIdentity.ProviderDisplayName;
             id = vssConnection.GetConnection().AuthorizedIdentity.Id;
@@ -23,14 +23,12 @@ namespace TfsWebAPi
             Domain = parts[2];
             Login = parts[3];
             Password = parts[4];
+            AuthenticationType = type;
         }
 
         public string AuthenticationType
         {
-            get
-            {
-                return "TFS";
-            }
+            get;
         }
 
         public bool IsAuthenticated
