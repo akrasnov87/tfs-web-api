@@ -46,10 +46,14 @@ namespace TfsWebAPi.Data
                     {
                         if (connection.AuthorizedIdentity.IsActive)
                         {
-                            string format = "text";
+                            string format = "text/plain";
                             if(context.HttpContext.Request.Headers["Content-Type"] != "text/plain")
                             {
                                 format = context.HttpContext.Request.Headers["Content-Type"];
+                                if(format == null)
+                                {
+                                    format = "text/plain";
+                                }
                             }
                             context.HttpContext.User = new TfsClaimsPrincipal(new TfsIdentity(vssConnection, tokenData[0], parts), format);
                             await next();
