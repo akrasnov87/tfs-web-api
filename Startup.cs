@@ -36,9 +36,9 @@ namespace TfsWebAPi
                 app.UseDeveloperExceptionPage();
             }
 
-            app.UseDefaultFiles("/tfs/dev")
-                .UseStaticFiles("/tfs/dev")
-                .UsePathBase("/tfs/dev");
+            app.UseDefaultFiles("/tfs")
+                .UseStaticFiles("/tfs")
+                .UsePathBase("/tfs");
 
             app.UseRouting();
             app.UseCors(builder => builder.AllowAnyOrigin());
