@@ -42,7 +42,9 @@ namespace TfsWebAPi.Controllers
             using (TfsClaimsPrincipal claim = (TfsClaimsPrincipal)HttpContext.User)
             {
                 CommandHandler handler = new CommandHandler(claim, null);
-                WebApiTeam team = handler.GetTeam(claim.TfsIdentity.ProjectId.ToString(), name);
+                WebApiTeam team = name == "@Me" 
+                    ? handler.GetTeamById(claim.TfsIdentity.ProjectId.ToString(), claim.TfsIdentity.TeamId.ToString())
+                    : handler.GetTeam(claim.TfsIdentity.ProjectId.ToString(), name);
 
                 if (claim.IsReturnJson)
                 {

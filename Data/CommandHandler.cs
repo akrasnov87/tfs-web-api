@@ -41,6 +41,18 @@ namespace TfsWebAPi.Data
         }
 
         /// <summary>
+        /// получение информации по команде
+        /// </summary>
+        /// <param name="projectId">иден. проекта</param>
+        /// <param name="teamId">иден. команды</param>
+        /// <returns></returns>
+        public WebApiTeam GetTeamById(string projectId, string teamId)
+        {
+            TeamHttpClient teamHttpClient = VssConnection.GetConnection().GetClient<TeamHttpClient>();
+            return teamHttpClient.GetTeamAsync(projectId, teamId).GetAwaiter().GetResult();
+        }
+
+        /// <summary>
         /// получение членов команды
         /// </summary>
         /// <param name="projectId">иден. проекта</param>
