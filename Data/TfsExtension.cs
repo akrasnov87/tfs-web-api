@@ -15,7 +15,7 @@ namespace TfsWebAPi.Data
             {
                 return "Информация о проекте не найдена.";
             }
-            return string.Format("Вы находитесь в проекте <b>{0}</b>.<br />{1}<br />Дополнительную информацию можно узнать перейдя по <a href=\"{2}\">ссылке</a>.", obj.Name, obj.Description, obj.Url);
+            return string.Format("Вы находитесь в проекте <b>{0}</b>.<br />{1}", obj.Name, obj.Description);
         }
 
         public static string ToBotString(this WebApiTeam obj)
@@ -24,7 +24,7 @@ namespace TfsWebAPi.Data
             {
                 return "Информация о команде не найдена.";
             }
-            return string.Format("Ваша команда <b>{0}</b>.<br />{1}<br />Дополнительную информацию можно узнать перейдя по <a href=\"{2}\">ссылке</a>.", obj.Name, obj.Description, obj.Url);
+            return string.Format("Ваша команда <b>{0}</b>.<br />{1}", obj.Name, obj.Description);
         }
 
         public static string ToBotString(this List<WebApiTeam> items)
