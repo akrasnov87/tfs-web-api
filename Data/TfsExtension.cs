@@ -11,18 +11,26 @@ namespace TfsWebAPi.Data
     {
         public static string ToBotString(this TeamProjectReference obj)
         {
+            if(obj == null)
+            {
+                return "Информация о проекте не найдена.";
+            }
             return string.Format("Вы находитесь в проекте <b>{0}</b>.<br />{1}<br />Дополнительную информацию можно узнать перейдя по <a href=\"{2}\">ссылке</a>.", obj.Name, obj.Description, obj.Url);
         }
 
         public static string ToBotString(this WebApiTeam obj)
         {
+            if (obj == null)
+            {
+                return "Информация о команде не найдена.";
+            }
             return string.Format("Ваша команда <b>{0}</b>.<br />{1}<br />Дополнительную информацию можно узнать перейдя по <a href=\"{2}\">ссылке</a>.", obj.Name, obj.Description, obj.Url);
         }
 
         public static string ToBotString(this List<WebApiTeam> items)
         {
             StringBuilder builder = new StringBuilder();
-            foreach(WebApiTeam team in items)
+            foreach(WebApiTeam team in items.OrderBy(t=>t.Name))
             {
                 builder.Append("<b>" + team.Name + "</b> - " + team.Description + "<br />");
             }
