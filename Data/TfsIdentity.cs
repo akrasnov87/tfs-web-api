@@ -23,6 +23,20 @@ namespace TfsWebAPi
             Domain = parts[2];
             Login = parts[3];
             Password = parts[4];
+            if(parts[5] == "")
+            {
+                ProjectId = null;
+            } else {
+                ProjectId = Guid.Parse(parts[5]);
+            }
+            if (parts[6] == "")
+            {
+                TeamId = null;
+            }
+            else
+            {
+                TeamId = Guid.Parse(parts[6]);
+            }
             AuthenticationType = type;
         }
 
@@ -53,6 +67,8 @@ namespace TfsWebAPi
 
         public string Url { get; }
         public string Project { get; }
+        public Guid? ProjectId { get; }
+        public Guid? TeamId { get; }
         public string Domain { get; }
         public string Login { get; }
         public string Password { get; }
