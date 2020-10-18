@@ -1,4 +1,6 @@
 ﻿using Microsoft.TeamFoundation.Core.WebApi;
+using Microsoft.TeamFoundation.WorkItemTracking.WebApi;
+using Microsoft.TeamFoundation.WorkItemTracking.WebApi.Models;
 using Microsoft.VisualStudio.Services.WebApi;
 using System;
 using System.Collections.Generic;
@@ -102,6 +104,59 @@ namespace TfsWebAPi.Data
                     };
                     break;
             }*/
+        }
+
+        /// <summary>
+        /// Получить список задач которые были выполнены за последний рабочий день
+        /// </summary>
+        /// <param name="name">Имя пользователя</param>
+        /// <returns></returns>
+        public IList<WorkItem> GetWorkItemLastResult(string name)
+        {
+            int i = 0;
+            IList<WorkItem> items;
+            do
+            {
+                items = GetWorkItemResult(name, i);
+                i++;
+            } while (items.Count == 0);
+            return items;
+        }
+
+        /// <summary>
+        /// Получить список задач которые были выполнены за текущий день
+        /// </summary>
+        /// <param name="name">Имя пользователя</param>
+        /// <param name="today">число дней минус сегодня. По умолчанию 0</param>
+        /// <returns></returns>
+        public IList<WorkItem> GetWorkItemResult(string name, int today = 0)
+        {
+            var wiql = new Wiql()
+            {
+                // NOTE: Even if other columns are specified, only the ID & URL will be available in the WorkItemReference
+                Query = "Select [Id] " +
+                   "From WorkItems " +
+                   "Where [Work Item Type] = 'Work' " +
+                   "And [Assigned To] = " + name + " " +
+                   "And [Created Date] = @Today - " + today +
+                   "Order By [Id] Desc",
+            };
+
+            WorkItemTrackingHttpClient workItemTrackingHttpClient = VssConnection.GetConnection().GetClient<WorkItemTrackingHttpClient>();
+            var result = workItemTrackingHttpClient.QueryByWiqlAsync(wiql).ConfigureAwait(false).GetAwaiter().GetResult();
+            var ids = result.WorkItems.Select(item => item.Id).ToArray();
+
+            // some error handling
+            if (ids.Length == 0)
+            {
+                return Array.Empty<WorkItem>();
+            }
+
+            // build a list of the fields we want to see
+            var fields = new[] { "System.Id", "System.Title", "Microsoft.VSTS.Scheduling.CompletedWork" };
+
+            // get work items for the ids found in query
+            return workItemTrackingHttpClient.GetWorkItemsAsync(ids, fields, result.AsOf).ConfigureAwait(false).GetAwaiter().GetResult();
         }
     }
 }
