@@ -26,7 +26,7 @@ namespace TfsWebAPi.Controllers
             using (TfsClaimsPrincipal claim = (TfsClaimsPrincipal)HttpContext.User)
             {
                 CommandHandler handler = new CommandHandler(claim, null);
-                Dictionary<IdentityRef, IList<WorkItem>> items = handler.GetWorkItemTodayTeamsResult(claim.TfsIdentity.ProjectId.ToString(), claim.TfsIdentity.TeamId.ToString());
+                Dictionary<IdentityRef, IList<WorkItem>> items = handler.GetWorkItemTodayTeamsResult(claim.TfsIdentity);
 
                 if (claim.IsReturnJson) {
                     return new JsonResult(items);

@@ -27,8 +27,10 @@ namespace TfsWebAPi.Data
         /// <returns></returns>
         public List<WebApiTeam> GetTeamsResult(string projectId)
         {
-            TeamHttpClient teamHttpClient = VssConnection.GetConnection().GetClient<TeamHttpClient>();
-            return teamHttpClient.GetTeamsAsync(projectId, null, 100).GetAwaiter().GetResult();
+            using (TeamHttpClient teamHttpClient = VssConnection.GetConnection().GetClient<TeamHttpClient>())
+            {
+                return teamHttpClient.GetTeamsAsync(projectId, null, 100).GetAwaiter().GetResult();
+            }
         }
 
         /// <summary>
@@ -45,25 +47,47 @@ namespace TfsWebAPi.Data
         /// <summary>
         /// получение информации по команде
         /// </summary>
-        /// <param name="projectId">иден. проекта</param>
-        /// <param name="teamId">иден. команды</param>
+        /// <param name="tfsIdentity">авторизация в TFS</param>
         /// <returns></returns>
-        public WebApiTeam GetTeamById(string projectId, string teamId)
+        public WebApiTeam GetTeamById(TfsIdentity tfsIdentity)
         {
-            TeamHttpClient teamHttpClient = VssConnection.GetConnection().GetClient<TeamHttpClient>();
-            return teamHttpClient.GetTeamAsync(projectId, teamId).GetAwaiter().GetResult();
+            using (TeamHttpClient teamHttpClient = VssConnection.GetConnection().GetClient<TeamHttpClient>())
+            {
+                return teamHttpClient.GetTeamAsync(tfsIdentity.ProjectId.ToString(), tfsIdentity.TeamId.ToString()).GetAwaiter().GetResult();
+            }
         }
 
         /// <summary>
         /// получение членов команды
         /// </summary>
-        /// <param name="projectId">иден. проекта</param>
-        /// <param name="teamId">иден. команды</param>
+        /// <param name="tfsIdentity">авторизация в TFS</param>
         /// <returns></returns>
-        public IEnumerable<IdentityRef> GetTeamMembers(string projectId, string teamId)
+        public IEnumerable<IdentityRef> GetTeamMembers(TfsIdentity tfsIdentity)
         {
-            TeamHttpClient teamHttpClient = VssConnection.GetConnection().GetClient<TeamHttpClient>();
-            return teamHttpClient.GetTeamMembers(projectId, teamId).ConfigureAwait(false).GetAwaiter().GetResult();
+            using (TeamHttpClient teamHttpClient = VssConnection.GetConnection().GetClient<TeamHttpClient>())
+            {
+                return teamHttpClient.GetTeamMembers(tfsIdentity.ProjectId.ToString(), tfsIdentity.TeamId.ToString()).ConfigureAwait(false).GetAwaiter().GetResult();
+            }
+        }
+
+        /// <summary>
+        /// получение члена команды по имени
+        /// </summary>
+        /// <param name="tfsIdentity">авторизация в TFS</param>
+        /// <param name="name">Имя</param>
+        /// <returns></returns>
+        public IdentityRef GetMemberByName(TfsIdentity tfsIdentity, string name)
+        {
+            name = name.ToLower().Replace("'", "");
+            IEnumerable<IdentityRef> identities = GetTeamMembers(tfsIdentity);
+            IEnumerable<IdentityRef> filterIdentities = identities.Where(t => t.DisplayName.ToLower().Contains(name == "@me" ? tfsIdentity.Name.ToLower() : name));
+            if(filterIdentities.Count() == 1)
+            {
+                return filterIdentities.First();
+            } else
+            {
+                return null;
+            }
         }
 
         /// <summary>
@@ -142,33 +166,34 @@ namespace TfsWebAPi.Data
                    "Order By [Id] Desc",
             };
 
-            WorkItemTrackingHttpClient workItemTrackingHttpClient = VssConnection.GetConnection().GetClient<WorkItemTrackingHttpClient>();
-            var result = workItemTrackingHttpClient.QueryByWiqlAsync(wiql).ConfigureAwait(false).GetAwaiter().GetResult();
-            var ids = result.WorkItems.Select(item => item.Id).ToArray();
-
-            // some error handling
-            if (ids.Length == 0)
+            using (WorkItemTrackingHttpClient workItemTrackingHttpClient = VssConnection.GetConnection().GetClient<WorkItemTrackingHttpClient>())
             {
-                return Array.Empty<WorkItem>();
+                var result = workItemTrackingHttpClient.QueryByWiqlAsync(wiql).ConfigureAwait(false).GetAwaiter().GetResult();
+                var ids = result.WorkItems.Select(item => item.Id).ToArray();
+
+                // some error handling
+                if (ids.Length == 0)
+                {
+                    return Array.Empty<WorkItem>();
+                }
+
+                // build a list of the fields we want to see
+                var fields = new[] { "System.Id", "System.Title", "Microsoft.VSTS.Scheduling.CompletedWork" };
+
+                // get work items for the ids found in query
+                return workItemTrackingHttpClient.GetWorkItemsAsync(ids, null, result.AsOf).ConfigureAwait(false).GetAwaiter().GetResult();
             }
-
-            // build a list of the fields we want to see
-            var fields = new[] { "System.Id", "System.Title", "Microsoft.VSTS.Scheduling.CompletedWork" };
-
-            // get work items for the ids found in query
-            return workItemTrackingHttpClient.GetWorkItemsAsync(ids, null, result.AsOf).ConfigureAwait(false).GetAwaiter().GetResult();
         }
 
         /// <summary>
         /// Получение списка выполненных задач командой за сегодня
         /// </summary>
-        /// <param name="projectId">иден. проекта</param>
-        /// <param name="teamId">иден. команды</param>
+        /// <param name="tfsIdentity">авторизация в TFS</param>
         /// <returns></returns>
-        public Dictionary<IdentityRef,IList<WorkItem>> GetWorkItemTodayTeamsResult(string projectId, string teamId)
+        public Dictionary<IdentityRef,IList<WorkItem>> GetWorkItemTodayTeamsResult(TfsIdentity tfsIdentity)
         {
             Dictionary<IdentityRef, IList<WorkItem>> pairs = new Dictionary<IdentityRef, IList<WorkItem>>();
-            IEnumerable<IdentityRef> identities = GetTeamMembers(projectId, teamId);
+            IEnumerable<IdentityRef> identities = GetTeamMembers(tfsIdentity);
             foreach(IdentityRef identity in identities)
             {
                 IList<WorkItem> workItems = GetWorkItemResult("'" + identity.DisplayName + "'");

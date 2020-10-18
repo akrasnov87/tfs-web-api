@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.TeamFoundation.Core.WebApi;
 using Microsoft.TeamFoundation.WorkItemTracking.WebApi.Models;
+using Microsoft.VisualStudio.Services.WebApi;
 using TfsWebAPi.Data;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -25,13 +26,24 @@ namespace TfsWebAPi.Controllers
             using (TfsClaimsPrincipal claim = (TfsClaimsPrincipal)HttpContext.User)
             {
                 CommandHandler handler = new CommandHandler(claim, null);
-                IList<WorkItem> items = handler.GetWorkItemLastResult(name);
+                IdentityRef identity = handler.GetMemberByName(claim.TfsIdentity, name);
+                if (identity == null)
+                {
+                    return new ContentResult().GetContentUserNotFound(name);
+                }
+                else
+                {
+                    IList<WorkItem> items = handler.GetWorkItemLastResult(name);
 
-                if (claim.IsReturnJson) {
-                    return new JsonResult(items);
-                } else {
-                    return claim.GetContentResult(items.ToBotString());
-                }          
+                    if (claim.IsReturnJson)
+                    {
+                        return new JsonResult(items);
+                    }
+                    else
+                    {
+                        return claim.GetContentResult(items.ToBotString());
+                    }
+                }
             }
         }
     }

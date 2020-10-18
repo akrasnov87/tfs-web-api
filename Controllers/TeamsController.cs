@@ -43,7 +43,7 @@ namespace TfsWebAPi.Controllers
             {
                 CommandHandler handler = new CommandHandler(claim, null);
                 WebApiTeam team = name == "@Me" 
-                    ? handler.GetTeamById(claim.TfsIdentity.ProjectId.ToString(), claim.TfsIdentity.TeamId.ToString())
+                    ? handler.GetTeamById(claim.TfsIdentity)
                     : handler.GetTeam(claim.TfsIdentity.ProjectId.ToString(), name);
 
                 if (claim.IsReturnJson)

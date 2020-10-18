@@ -1,4 +1,5 @@
-﻿using Microsoft.TeamFoundation.Core.WebApi;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.TeamFoundation.Core.WebApi;
 using Microsoft.TeamFoundation.WorkItemTracking.WebApi.Models;
 using Microsoft.VisualStudio.Services.WebApi;
 using System;
@@ -76,5 +77,12 @@ namespace TfsWebAPi.Data
                 return "_" + builder.ToString() + "_" + "Общие результат: *" + sum + "*";
             }
         }
+
+        public static ContentResult GetContentUserNotFound(this ContentResult result, string name)
+        {
+            result.ContentType = "text/plain";
+            result.Content = "Член команды *" + name + "* не найден.<br />Выполните запрос на получение списка сотрудников в команде.";
+            return result;
+        } 
     }
 }
