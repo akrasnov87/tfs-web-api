@@ -156,7 +156,25 @@ namespace TfsWebAPi.Data
             var fields = new[] { "System.Id", "System.Title", "Microsoft.VSTS.Scheduling.CompletedWork" };
 
             // get work items for the ids found in query
-            return workItemTrackingHttpClient.GetWorkItemsAsync(ids, fields, result.AsOf).ConfigureAwait(false).GetAwaiter().GetResult();
+            return workItemTrackingHttpClient.GetWorkItemsAsync(ids, null, result.AsOf).ConfigureAwait(false).GetAwaiter().GetResult();
+        }
+
+        /// <summary>
+        /// Получение списка выполненных задач командой за сегодня
+        /// </summary>
+        /// <param name="projectId">иден. проекта</param>
+        /// <param name="teamId">иден. команды</param>
+        /// <returns></returns>
+        public Dictionary<IdentityRef,IList<WorkItem>> GetWorkItemTodayTeamsResult(string projectId, string teamId)
+        {
+            Dictionary<IdentityRef, IList<WorkItem>> pairs = new Dictionary<IdentityRef, IList<WorkItem>>();
+            IEnumerable<IdentityRef> identities = GetTeamMembers(projectId, teamId);
+            foreach(IdentityRef identity in identities)
+            {
+                IList<WorkItem> workItems = GetWorkItemResult("'" + identity.DisplayName + "'");
+                pairs.Add(identity, workItems);
+            }
+            return pairs;
         }
     }
 }

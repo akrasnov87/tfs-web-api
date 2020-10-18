@@ -1,5 +1,6 @@
 ﻿using Microsoft.TeamFoundation.Core.WebApi;
 using Microsoft.TeamFoundation.WorkItemTracking.WebApi.Models;
+using Microsoft.VisualStudio.Services.WebApi;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -52,6 +53,27 @@ namespace TfsWebAPi.Data
             } else
             {
                 return "_" + builder.ToString() + "_" + "Всего: *" + items.Sum(t=>(double)t.Fields["Microsoft.VSTS.Scheduling.CompletedWork"]) + "*";
+            }
+        }
+
+        public static string ToBotString(this Dictionary<IdentityRef, IList<WorkItem>> pairs)
+        {
+            StringBuilder builder = new StringBuilder();
+            double sum = 0.0;
+            foreach(KeyValuePair<IdentityRef, IList<WorkItem>> key in pairs)
+            {
+                IList<WorkItem> items = key.Value;
+                sum += items.Sum(t => (double)t.Fields["Microsoft.VSTS.Scheduling.CompletedWork"]);
+                builder.Append(string.Format("*{0}* ({1})<br />", key.Key.DisplayName, items.Sum(t => (double)t.Fields["Microsoft.VSTS.Scheduling.CompletedWork"])));
+                builder.Append(items.ToBotString() + "<br />");
+            }
+            if (builder.Length == 0)
+            {
+                return "Общие результат: *0*";
+            }
+            else
+            {
+                return "_" + builder.ToString() + "_" + "Общие результат: *" + sum + "*";
             }
         }
     }
