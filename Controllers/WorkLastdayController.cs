@@ -41,7 +41,7 @@ namespace TfsWebAPi.Controllers
                     }
                     else
                     {
-                        return claim.GetContentResult(items.ToBotString());
+                        return claim.GetContentResult(items.ToBotString(isShowDate:true));
                     }
                 }
             }

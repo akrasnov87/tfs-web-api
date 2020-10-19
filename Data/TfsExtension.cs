@@ -41,9 +41,13 @@ namespace TfsWebAPi.Data
             return str.Substring(0, str.Length - 6);
         }
 
-        public static string ToBotString(this IList<WorkItem> items)
+        public static string ToBotString(this IList<WorkItem> items, bool isShowDate = false)
         {
             StringBuilder builder = new StringBuilder();
+            if(items.Count > 0 && isShowDate)
+            {
+                builder.Append(((DateTime)items.First().Fields["System.CreatedDate"]).ToString("dd.MM.yyyy") + "<br />");
+            }
             foreach (WorkItem workItem in items)
             {
                 builder.Append(string.Format("#{0} {1} - {2}<br />", workItem.Id, workItem.Fields["System.Title"], workItem.Fields["Microsoft.VSTS.Scheduling.CompletedWork"]));
@@ -84,5 +88,17 @@ namespace TfsWebAPi.Data
             result.Content = "Член команды *" + name + "* не найден.<br />Выполните запрос на получение списка сотрудников в команде.";
             return result;
         } 
+
+        public static string ToBotString(this IEnumerable<IdentityRef> identities)
+        {
+            StringBuilder builder = new StringBuilder();
+
+            foreach(IdentityRef identity in identities.OrderBy(t => t.DisplayName))
+            {
+                builder.Append(string.Format("{0}<br />", identity.DisplayName));
+            }
+            builder.Append("Всего: *" + identities.Count() + "*");
+            return builder.ToString();
+        }
     }
 }

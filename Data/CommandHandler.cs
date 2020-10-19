@@ -166,23 +166,21 @@ namespace TfsWebAPi.Data
                    "Order By [Id] Desc",
             };
 
-            using (WorkItemTrackingHttpClient workItemTrackingHttpClient = VssConnection.GetConnection().GetClient<WorkItemTrackingHttpClient>())
+            WorkItemTrackingHttpClient workItemTrackingHttpClient = VssConnection.GetConnection().GetClient<WorkItemTrackingHttpClient>();
+            var result = workItemTrackingHttpClient.QueryByWiqlAsync(wiql).ConfigureAwait(false).GetAwaiter().GetResult();
+            var ids = result.WorkItems.Select(item => item.Id).ToArray();
+
+            // some error handling
+            if (ids.Length == 0)
             {
-                var result = workItemTrackingHttpClient.QueryByWiqlAsync(wiql).ConfigureAwait(false).GetAwaiter().GetResult();
-                var ids = result.WorkItems.Select(item => item.Id).ToArray();
-
-                // some error handling
-                if (ids.Length == 0)
-                {
-                    return Array.Empty<WorkItem>();
-                }
-
-                // build a list of the fields we want to see
-                var fields = new[] { "System.Id", "System.Title", "Microsoft.VSTS.Scheduling.CompletedWork" };
-
-                // get work items for the ids found in query
-                return workItemTrackingHttpClient.GetWorkItemsAsync(ids, null, result.AsOf).ConfigureAwait(false).GetAwaiter().GetResult();
+                return Array.Empty<WorkItem>();
             }
+
+            // build a list of the fields we want to see
+            var fields = new[] { "System.Id", "System.Title", "Microsoft.VSTS.Scheduling.CompletedWork" };
+
+            // get work items for the ids found in query
+            return workItemTrackingHttpClient.GetWorkItemsAsync(ids, null, result.AsOf).ConfigureAwait(false).GetAwaiter().GetResult();
         }
 
         /// <summary>
