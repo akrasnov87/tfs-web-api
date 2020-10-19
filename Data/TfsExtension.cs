@@ -57,7 +57,7 @@ namespace TfsWebAPi.Data
                 return "Всего: *0*";
             } else
             {
-                return builder.ToString() + "Всего: *" + items.Sum(t=>(double)t.Fields["Microsoft.VSTS.Scheduling.CompletedWork"]) + "*";
+                return builder.ToString() + "<br />Всего: *" + items.Sum(t=>(double)t.Fields["Microsoft.VSTS.Scheduling.CompletedWork"]) + "*";
             }
         }
 
@@ -78,10 +78,16 @@ namespace TfsWebAPi.Data
             }
             else
             {
-                return builder.ToString() + "Общие результат: *" + sum + "*";
+                return builder.ToString() + "<br />Общие результат: *" + sum + "*";
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="pairs"></param>
+        /// <param name="work">true - списал часы полностью, false - не списал часы полностью</param>
+        /// <returns></returns>
         public static string ToBotString(this Dictionary<IdentityRef, IList<WorkItem>> pairs, bool work)
         {
             StringBuilder builder = new StringBuilder();
@@ -89,20 +95,22 @@ namespace TfsWebAPi.Data
             foreach (KeyValuePair<IdentityRef, IList<WorkItem>> key in pairs)
             {
                 IList<WorkItem> items = key.Value;
-                if(work) // списывались
+                if(work) // списал часы полностью
                 {
-                    if (items.Count > 0)
+                    if (items.Sum(t => (double)t.Fields["Microsoft.VSTS.Scheduling.CompletedWork"]) >= 6)
                     {
                         count++;
                         builder.Append(string.Format("*{0}* ({1})<br />", key.Key.DisplayName, items.Sum(t => (double)t.Fields["Microsoft.VSTS.Scheduling.CompletedWork"])));
                         builder.Append(items.ToBotString() + "<br />");
                     }
-                } else // не списывались
+                }
+                else // не списал часы полностью
                 {
-                    if (items.Count == 0)
+                    if (items.Sum(t => (double)t.Fields["Microsoft.VSTS.Scheduling.CompletedWork"]) < 6)
                     {
                         count++;
                         builder.Append(string.Format("*{0}* ({1})<br />", key.Key.DisplayName, items.Sum(t => (double)t.Fields["Microsoft.VSTS.Scheduling.CompletedWork"])));
+                        builder.Append(items.ToBotString() + "<br />");
                     }
                 }
             }
@@ -112,7 +120,7 @@ namespace TfsWebAPi.Data
             }
             else
             {
-                return builder.ToString() + "Количество: *" + count + "*";
+                return builder.ToString() + "<br />Количество: *" + count + "*";
             }
         }
 
@@ -131,7 +139,7 @@ namespace TfsWebAPi.Data
             {
                 builder.Append(string.Format("{0}<br />", identity.DisplayName));
             }
-            builder.Append("Всего: *" + identities.Count() + "*");
+            builder.Append("<br />Всего: *" + identities.Count() + "*");
             return builder.ToString();
         }
     }
