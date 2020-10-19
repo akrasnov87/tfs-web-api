@@ -35,5 +35,24 @@ namespace TfsWebAPi.Controllers
                 }          
             }
         }
+
+        [HttpGet("{work}")]
+        public ActionResult Get(bool work)
+        {
+            using (TfsClaimsPrincipal claim = (TfsClaimsPrincipal)HttpContext.User)
+            {
+                CommandHandler handler = new CommandHandler(claim, null);
+                Dictionary<IdentityRef, IList<WorkItem>> items = handler.GetWorkItemTodayTeamsResult(claim.TfsIdentity);
+
+                if (claim.IsReturnJson)
+                {
+                    return new JsonResult(items);
+                }
+                else
+                {
+                    return claim.GetContentResult(items.ToBotString(work));
+                }
+            }
+        }
     }
 }

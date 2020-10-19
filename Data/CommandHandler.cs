@@ -162,7 +162,7 @@ namespace TfsWebAPi.Data
                    "From WorkItems " +
                    "Where [Work Item Type] = 'Work' " +
                    "And [Assigned To] = " + name + " " +
-                   "And [Created Date] = @Today - " + today +
+                   "And [IServ.VSTS.Scheduling.WorkDate] = @Today - " + today +
                    "Order By [Id] Desc",
             };
 

@@ -46,7 +46,7 @@ namespace TfsWebAPi.Data
             StringBuilder builder = new StringBuilder();
             if(items.Count > 0 && isShowDate)
             {
-                builder.Append(((DateTime)items.First().Fields["System.CreatedDate"]).ToString("dd.MM.yyyy") + "<br />");
+                builder.Append(((DateTime)items.First().Fields["IServ.VSTS.Scheduling.WorkDate"]).ToString("dd.MM.yyyy") + "<br />");
             }
             foreach (WorkItem workItem in items)
             {
@@ -79,6 +79,41 @@ namespace TfsWebAPi.Data
             else
             {
                 return "_" + builder.ToString() + "_" + "Общие результат: *" + sum + "*";
+            }
+        }
+
+        public static string ToBotString(this Dictionary<IdentityRef, IList<WorkItem>> pairs, bool work)
+        {
+            StringBuilder builder = new StringBuilder();
+            int count = 0;
+            foreach (KeyValuePair<IdentityRef, IList<WorkItem>> key in pairs)
+            {
+                IList<WorkItem> items = key.Value;
+                if(work) // списывались
+                {
+                    if (items.Count > 0)
+                    {
+                        count++;
+                        builder.Append(string.Format("*{0}* ({1})<br />", key.Key.DisplayName, items.Sum(t => (double)t.Fields["Microsoft.VSTS.Scheduling.CompletedWork"])));
+                        builder.Append(items.ToBotString() + "<br />");
+                    }
+                } else // не списывались
+                {
+                    if (items.Count == 0)
+                    {
+                        count++;
+                        builder.Append(string.Format("*{0}* ({1})<br />", key.Key.DisplayName, items.Sum(t => (double)t.Fields["Microsoft.VSTS.Scheduling.CompletedWork"])));
+                        builder.Append(items.ToBotString() + "<br />");
+                    }
+                }
+            }
+            if (builder.Length == 0)
+            {
+                return "Количество: *0*";
+            }
+            else
+            {
+                return "_" + builder.ToString() + "_" + "Количество: *" + count + "*";
             }
         }
 
