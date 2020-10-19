@@ -57,7 +57,7 @@ namespace TfsWebAPi.Data
                 return "Всего: *0*";
             } else
             {
-                return "_" + builder.ToString() + "_" + "Всего: *" + items.Sum(t=>(double)t.Fields["Microsoft.VSTS.Scheduling.CompletedWork"]) + "*";
+                return builder.ToString() + "Всего: *" + items.Sum(t=>(double)t.Fields["Microsoft.VSTS.Scheduling.CompletedWork"]) + "*";
             }
         }
 
@@ -78,7 +78,7 @@ namespace TfsWebAPi.Data
             }
             else
             {
-                return "_" + builder.ToString() + "_" + "Общие результат: *" + sum + "*";
+                return builder.ToString() + "Общие результат: *" + sum + "*";
             }
         }
 
