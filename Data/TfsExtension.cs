@@ -103,7 +103,6 @@ namespace TfsWebAPi.Data
                     {
                         count++;
                         builder.Append(string.Format("*{0}* ({1})<br />", key.Key.DisplayName, items.Sum(t => (double)t.Fields["Microsoft.VSTS.Scheduling.CompletedWork"])));
-                        builder.Append(items.ToBotString() + "<br />");
                     }
                 }
             }
@@ -113,7 +112,7 @@ namespace TfsWebAPi.Data
             }
             else
             {
-                return "_" + builder.ToString() + "_" + "Количество: *" + count + "*";
+                return builder.ToString() + "Количество: *" + count + "*";
             }
         }
 
